@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Hasil {{ record.id[:8] }}{% endblock %}
+{% block content %}
+<section class="page-heading result-heading">
+  <div>
+    <a class="back-link" href="{{ url_for('history') }}">← Riwayat pemeriksaan</a>
+    <p class="eyebrow">HASIL PEMERIKSAAN <span>{{ record.id[:12] }}</span></p>
+    <h1>Ringkasan <em>analisis.</em></h1>
+    <p class="lede">{{ record.original_name }} <span class="meta-dot">·</span> {{ record.created_at }}</p>
+  </div>
+  <a class="button button-secondary" href="{{ url_for('report', check_id=record.id) }}"><span aria-hidden="true">↓</span> Unduh laporan PDF</a>
+</section>
+<div class="result-banner status-{{ record.result.status }}">
+  <span class="status-symbol" aria-hidden="true">{% if record.result.status == 'indikasi_manipulasi' %}!{% elif record.result.status == 'tidak_ditemukan_indikasi' %}✓{% else %}?{% endif %}</span>
+  <div><p class="eyebrow">KESIMPULAN SEMENTARA</p><h2>{{ record.result.status.replace('_', ' ')|title }}</h2><p>{{ record.result.reasons|join(' ') }}</p></div>
+  <span class="no-score">TANPA SKOR PROBABILITAS</span>
+</div>
+<div class="result-grid">
+  <section class="content-section image-section">
+    <div class="section-head"><div><p class="eyebrow">PEMERIKSAAN VISUAL</p><h2>Gambar dan peta analisis</h2></div></div>
+    <div class="image-comparison">
+      <figure class="evidence-image"><img src="{{ url_for('image_file', check_id=record.id, kind='original') }}" alt="Gambar bukti transfer yang diperiksa"><figcaption><span>01</span> GAMBAR ASLI</figcaption></figure>
+      {% if record.image_analysis.available %}
+      <figure class="evidence-image"><img src="{{ url_for('image_file', check_id=record.id, kind='ela') }}" alt="Peta visual ELA, warna terang menunjukkan selisih kompresi"><figcaption><span>02</span> PETA ELA · JPEG</figcaption></figure>
+      {% else %}
+      <div class="unavailable-panel"><span class="method-index">02</span><h3>ELA tidak tersedia</h3><p>{{ record.image_analysis.note }}</p></div>
+      {% endif %}
+    </div>
+    <p class="analysis-note">{{ record.image_analysis.note }}</p>
+    {% if record.image_analysis.metrics %}<div class="metric-strip"><div><span>RATA-RATA SELISIH</span><strong>{{ record.image_analysis.metrics.mean_error }}</strong></div><div><span>PERSENTIL 95</span><strong>{{ record.image_analysis.metrics.p95_error }}</strong></div><div><span>RESOLUSI</span><strong>{{ record.image_analysis.metrics.width }} × {{ record.image_analysis.metrics.height }}</strong></div></div>{% endif %}
+  </section>
+  <section class="content-section ocr-section">
+    <div class="section-head"><div><p class="eyebrow">PEMBACAAN TEKS</p><h2>OCR dan kandidat</h2></div><span class="small-status">{{ record.ocr_status }}</span></div>
+    {% if candidates.nominal_kandidat or candidates.tanggal_kandidat %}
+    <div class="candidate-list">
+      {% for value in candidates.nominal_kandidat %}<span class="candidate-label">NOMINAL?</span><code>{{ value }}</code>{% endfor %}
+      {% for value in candidates.tanggal_kandidat %}<span class="candidate-label">TANGGAL?</span><code>{{ value }}</code>{% endfor %}
+    </div>{% endif %}
+    {% if record.ocr_note %}<p class="analysis-note">{{ record.ocr_note }}</p>{% endif %}
+    <pre class="ocr-output">{{ record.ocr_text if record.ocr_text else 'Belum ada teks yang dapat dibaca.' }}</pre>
+    <p class="analysis-note">Kandidat adalah potongan teks OCR, bukan verifikasi nama, nominal, atau transaksi.</p>
+  </section>
+  <section class="content-section metadata-section">
+    <div class="section-head"><div><p class="eyebrow">PROPERTI BERKAS</p><h2>Metadata yang ditemukan</h2></div></div>
+    <dl class="metadata-list">
+      <div><dt>Format</dt><dd>{{ record.metadata.format }}</dd></div>
+      <div><dt>Ukuran</dt><dd>{{ (record.file_size / 1024)|round(1) }} KB</dd></div>
+      <div><dt>Resolusi</dt><dd>{{ record.width }} × {{ record.height }} px</dd></div>
+      <div><dt>Waktu salinan server</dt><dd>{{ record.metadata.server_copy_mtime }}</dd></div>
+      {% for key, value in record.metadata.exif.items() %}<div><dt>EXIF · {{ key }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+    </dl>
+    <p class="analysis-note">{{ record.metadata.limitations }}</p>
+  </section>
+  <section class="content-section label-section">
+    <div class="section-head"><div><p class="eyebrow">CATATAN DATASET</p><h2>Label kebenaran</h2></div><span class="small-status">OPSIONAL</span></div>
+    <p class="label-help">Gunakan hanya jika status gambar diketahui untuk eksperimen. Label ini terpisah dari hasil analisis.</p>
+    <form class="label-form" action="{{ url_for('label', check_id=record.id) }}" method="post">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+      <select name="true_label" aria-label="Label sebenarnya" required><option value="" disabled {% if not record.true_label %}selected{% endif %}>Pilih label sebenarnya</option><option value="asli" {% if record.true_label == 'asli' %}selected{% endif %}>Asli (terverifikasi)</option><option value="manipulasi" {% if record.true_label == 'manipulasi' %}selected{% endif %}>Manipulasi (terverifikasi)</option></select>
+      <button class="button button-secondary" type="submit">Simpan label</button>
+    </form>
+    <a class="text-link export-link" href="{{ url_for('evaluation_csv') }}">Ekspor label dataset CSV ↗</a>
+  </section>
+</div>
+<div class="result-footnote"><span>ID PEMERIKSAAN</span><code>{{ record.id }}</code><span>·</span><span>Label evaluasi tidak mengubah kesimpulan analisis.</span></div>
+{% endblock %}

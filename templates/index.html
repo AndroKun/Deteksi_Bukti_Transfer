@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Pemeriksaan{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">MEJA PEMERIKSAAN <span>01 / ANALISIS CITRA</span></p>
+    <h1>Periksa sebuah <em>bukti transfer.</em></h1>
+    <p class="lede">Tinjau teks, metadata, dan pola kompresi gambar dalam satu pemeriksaan.</p>
+  </div>
+  <a class="text-link" href="{{ url_for('history') }}">Buka riwayat <span aria-hidden="true">↗</span></a>
+</section>
+<div class="privacy-banner" role="note">
+  <span class="notice-icon" aria-hidden="true">!</span>
+  <p><strong>Analisis indikatif, bukan bukti keaslian.</strong> Hasil yang tidak menemukan indikasi tidak menjamin transaksi benar-benar terjadi.</p>
+  <span class="local-tag">LOKAL</span>
+</div>
+<div class="workbench-grid">
+  <section class="upload-panel">
+    <div class="section-head">
+      <div><p class="eyebrow">BERKAS SUMBER</p><h2>Mulai pemeriksaan</h2></div>
+      <span class="step-count">LANGKAH 1 <span>/ 1</span></span>
+    </div>
+    <form id="upload-form" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+      <input id="image-input" class="visually-hidden" type="file" name="image" accept="image/jpeg,image/png,image/webp" required>
+      <label id="drop-zone" class="drop-zone" for="image-input" tabindex="0">
+        <span class="upload-symbol" aria-hidden="true"><span>↑</span></span>
+        <span class="drop-title">Tarik gambar ke sini</span>
+        <span class="drop-subtitle">atau <span class="choose-file">pilih dari perangkat</span></span>
+        <span class="file-types">JPEG · PNG · WEBP <i></i> MAKS. {{ max_upload_mb }} MB</span>
+      </label>
+      <p id="file-error" class="field-error" role="alert" hidden></p>
+      <div id="image-preview" class="image-preview" hidden>
+        <img id="preview-image" alt="Pratinjau gambar yang dipilih">
+        <div class="preview-meta"><span id="preview-name"></span><button id="remove-file" class="icon-button" type="button" aria-label="Hapus gambar">×</button></div>
+      </div>
+      <button id="submit-button" class="button button-primary submit-button" type="submit" disabled>
+        <span>Analisis gambar</span><span aria-hidden="true">→</span>
+      </button>
+      <div id="analysis-progress" class="progress-message" role="status" hidden><span class="spinner"></span> Pemeriksaan sedang berlangsung…</div>
+    </form>
+  </section>
+  <aside class="method-panel">
+    <p class="eyebrow">CAKUPAN PROTOTIPE</p>
+    <div class="method-row"><span class="method-index">01</span><div><h3>Pembacaan teks</h3><p>OCR mencari teks dan kandidat nominal atau tanggal. Hasil baca dapat keliru.</p></div><span class="method-state">OCR</span></div>
+    <div class="method-row"><span class="method-index">02</span><div><h3>Metadata berkas</h3><p>Format, dimensi, waktu berkas, dan EXIF yang tersedia.</p></div><span class="method-state">EXIF</span></div>
+    <div class="method-row"><span class="method-index">03</span><div><h3>Perbedaan kompresi</h3><p>Visualisasi ELA untuk JPEG; bukan alat pendeteksi tunggal.</p></div><span class="method-state">ELA</span></div>
+    <div class="method-footnote"><span aria-hidden="true">↳</span> Gambar dan riwayat disimpan lokal di server aplikasi ini.</div>
+  </aside>
+</div>
+{% endblock %}

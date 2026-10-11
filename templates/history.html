@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Riwayat{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div><p class="eyebrow">ARSIP LOKAL <span>02 / PEMERIKSAAN</span></p><h1>Riwayat <em>pemeriksaan.</em></h1><p class="lede">Berkas dan hasil tersimpan pada instalasi aplikasi ini.</p></div>
+  <a class="button button-primary" href="{{ url_for('index') }}"><span aria-hidden="true">+</span> Pemeriksaan baru</a>
+</section>
+<div class="privacy-banner" role="note"><span class="notice-icon" aria-hidden="true">!</span><p><strong>Riwayat tidak memakai akun.</strong> Aplikasi hanya menerima koneksi lokal. Jangan publikasikan server ini tanpa menambahkan autentikasi dan pembatasan akses.</p><a class="text-link" href="{{ url_for('evaluation_csv') }}">Ekspor CSV ↗</a></div>
+<section class="history-section">
+  <div class="section-head"><div><p class="eyebrow">DAFTAR PEMERIKSAAN</p><h2>{{ records|length }} tersimpan</h2></div></div>
+  {% if records %}
+  <div class="history-table-wrap"><table class="history-table"><thead><tr><th>ID / WAKTU</th><th>NAMA BERKAS</th><th>KESIMPULAN</th><th>LABEL DATASET</th><th></th></tr></thead><tbody>
+    {% for record in records %}<tr>
+      <td><a class="record-id" href="{{ url_for('result', check_id=record.id) }}">{{ record.id[:12] }}</a><span class="record-time">{{ record.created_at }}</span></td>
+      <td class="file-name">{{ record.original_name }}</td>
+      <td><span class="table-status status-text-{{ record.result.status }}">{{ record.result.status.replace('_', ' ') }}</span></td>
+      <td>{{ record.true_label or '—' }}</td>
+      <td><form action="{{ url_for('delete', check_id=record.id) }}" method="post" data-confirm="Hapus pemeriksaan dan gambar terkait secara permanen?"><input type="hidden" name="_csrf_token" value="{{ csrf_token }}"><button class="delete-button" type="submit" aria-label="Hapus {{ record.original_name }}">Hapus</button></form></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-state"><span class="empty-mark" aria-hidden="true">—</span><h2>Belum ada pemeriksaan</h2><p>Hasil pemeriksaan berikutnya akan muncul di arsip lokal ini.</p><a class="text-link" href="{{ url_for('index') }}">Mulai pemeriksaan ↗</a></div>{% endif %}
+</section>
+{% endblock %}

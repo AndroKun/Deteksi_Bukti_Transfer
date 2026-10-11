@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f0">
+  <title>{% block title %}Ruang Bukti{% endblock %} · Ruang Bukti</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}" aria-label="Ruang Bukti, beranda">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      <span>ruang<span class="brand-light">bukti</span></span>
+      <span class="brand-caption">LAB FORENSIK DIGITAL</span>
+    </a>
+    <nav class="main-nav" aria-label="Navigasi utama">
+      <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Pemeriksaan</a>
+      <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">Riwayat</a>
+    </nav>
+    <span class="local-indicator"><span></span> INSTALASI LOKAL</span>
+  </header>
+  <main class="page-shell">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <span>Analisis indikasi manipulasi · Bukan verifikasi transaksi</span>
+    <span>Data tersimpan pada instalasi ini</span>
+  </footer>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
